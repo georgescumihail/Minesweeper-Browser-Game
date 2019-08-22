@@ -7,28 +7,15 @@ generateField();
 generateMud();
 calculateValues();
 
+
 var canvas = document.getElementById('game');
 var context = canvas.getContext('2d');
 
 canvas.width = 400;
 canvas.height = 400;
 
-for (var i = 0; i <= tableSize; i++) {
 
-    context.strokeStyle = '#88DD88';
-    context.beginPath();
-    context.moveTo(0, i * (canvas.height / tableSize));
-    context.lineTo(600, i * (canvas.height / tableSize));
-    context.stroke();
-
-    context.beginPath();
-    context.moveTo(i * (canvas.height / tableSize), 0);
-    context.lineTo(i * (canvas.height / tableSize), 600);
-    context.stroke();
-
-}
-
-context.strokeRect(0, 0, canvas.width, canvas.height);
+drawGrid();
 
 for (var i = 0; i < tableSize; i++) {
     for (var j = 0; j < tableSize; j++) {
@@ -36,11 +23,47 @@ for (var i = 0; i < tableSize; i++) {
         if (gamefield[i][j] == 99) {
 
             context.fillStyle = '#775511';
-            context.fillRect(i * (canvas.height / tableSize), j * (canvas.height / tableSize), canvas.height / tableSize, canvas.height / tableSize);
+            context.fillRect(j * (canvas.height / tableSize), i * (canvas.height / tableSize), canvas.height / tableSize, canvas.height / tableSize);
+        }
+
+        else if (gamefield[i][j] > 0) {
+            context.font = '25px Comic Sans MS';
+            context.fillStyle = '#AAFFAA';
+            context.fillRect(j * (canvas.height / tableSize), i * (canvas.height / tableSize), canvas.height / tableSize, canvas.height / tableSize);
+            context.fillStyle = '#EE4444';
+            context.fillText(gamefield[i][j], j * (canvas.height / tableSize) + canvas.height / tableSize / 3, i * (canvas.height / tableSize) + canvas.height / tableSize / 1.4);
+        }
+        else {
+            context.font = '25px Comic Sans MS';
+            context.fillStyle = '#AAFFAA';
+            context.fillRect(j * (canvas.height / tableSize), i * (canvas.height / tableSize), canvas.height / tableSize, canvas.height / tableSize);
+            context.fillStyle = '#111111';
+            context.fillText(gamefield[i][j], j * (canvas.height / tableSize) + canvas.height / tableSize / 3, i * (canvas.height / tableSize) + canvas.height / tableSize / 1.4);
         }
     }
+
 }
 
+drawGrid();
+
+function drawGrid() {
+    for (var i = 0; i <= tableSize; i++) {
+
+        context.strokeStyle = '#111111';
+        context.beginPath();
+        context.moveTo(0, i * (canvas.height / tableSize));
+        context.lineTo(600, i * (canvas.height / tableSize));
+        context.stroke();
+
+        context.beginPath();
+        context.moveTo(i * (canvas.height / tableSize), 0);
+        context.lineTo(i * (canvas.height / tableSize), 600);
+        context.stroke();
+
+    }
+
+    context.strokeRect(0, 0, canvas.width, canvas.height);
+}
 
 function generateField() {
 

@@ -1,12 +1,41 @@
+body {
+
+    background-color: #FFEEEE;
+}
+
 #container {
 
     width: 70%;
     margin: 0 auto;
-    margin-top: 30px;
+    margin-top: 10px;
     text-align: center;
 }
 
 #game {
 
-    border: 2px solid #9999FF;
+    border: 2px solid #FFAABB;
+}
+
+#head-section {
+
+    width: 750px;
+    margin: 0 auto;
+    margin-top: 40px;
+}
+
+#head-section h3 {
+
+    position: relative;
+    bottom: 30px;
+    display: inline;
+    font-family: "Comic Sans MS";
+    font-size: 40px;
+    color: #FFAABB;
+    font-style: italic;
+}
+
+#head-section img {
+
+    margin: 0px 20px;
+    width: 90px;
 }
