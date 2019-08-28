@@ -18,7 +18,7 @@ body {
 
 #head-section {
 
-    width: 750px;
+    width: 720px;
     margin: 0 auto;
     margin-top: 40px;
 }
@@ -38,4 +38,27 @@ body {
 
     margin: 0px 20px;
     width: 90px;
+}
+
+#restart {
+
+    display: block;
+    border: 3px solid #FFAABB;
+    color: #FFAABB;
+    background-color: #FFFFFF;
+    font-family: "Comic Sans MS";
+    font-size: 25px;
+    margin: 0 auto;
+    margin-top: 20px;
+    border-radius: 5px;
+}
+
+#lost-message {
+
+    font-family: "Comic Sans MS";
+    font-size: 20px;
+    color: #FF2233;
+    font-style: italic;
+    margin: 0 auto;
+    margin-top: 10px;
 }
