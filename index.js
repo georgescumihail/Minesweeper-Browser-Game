@@ -3,9 +3,14 @@ var visited = []
 var mudHoles = []
 
 var tableSize = 10;
+var lost = false;
 
 var canvas = document.getElementById('game');
 var context = canvas.getContext('2d');
+
+
+var lostMessage = document.getElementById('lost-message');
+
 
 var canvasSize = 400;
 
@@ -16,12 +21,12 @@ var sectionSize = canvasSize / tableSize;
 
 canvas.addEventListener('mousedown', function (e) {
 
-    if (e.button == 1) {
+    if (e.button == 0) {
         clickedSection(e);
     }
 
     if (e.button == 2) {
-        rightClickedSection(e);
+        //rightClickedSection(e);
     }
 });
 
@@ -29,14 +34,17 @@ canvas.addEventListener('mousedown', function (e) {
 var restartButton = document.getElementById('restart');
 restartButton.addEventListener('click', startGame);
 
-var lost = false;
+
 
 startGame();
 
 function startGame() {
 
+    lost = false;
+    lostMessage.innerText = '';
     context.clearRect(0, 0, canvasSize, canvasSize);
     context.globalAlpha = 1;
+
     generateField();
     generateMud();
     calculateValues();
