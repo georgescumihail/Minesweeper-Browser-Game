@@ -1,6 +1,9 @@
 var gamefield = []
+var savedGamefield = []
 var visited = []
 var mudHoles = []
+var piggies = 10;
+var mudLeft = 10;
 
 var tableSize = 10;
 var lost = false;
@@ -8,8 +11,15 @@ var lost = false;
 var canvas = document.getElementById('game');
 var context = canvas.getContext('2d');
 
+var piggyImage = new Image();
+piggyImage.src = 'img/piggy-mine.png';
+piggyImage.width = 40;
+piggyImage.height = 40;
+piggyImage.globalAlpha = 0.5;
 
 var lostMessage = document.getElementById('lost-message');
+var wonMessage = document.getElementById('won-message');
+var pigScore = document.getElementById('score');
 
 
 var canvasSize = 400;
@@ -25,11 +35,14 @@ canvas.addEventListener('mousedown', function (e) {
         clickedSection(e);
     }
 
-    if (e.button == 2) {
-        //rightClickedSection(e);
+    if (e.button == 2 && piggies >= 0) {
+        rightClickedSection(e);
     }
 });
 
+document.addEventListener('contextmenu', function (e) {
+    e.preventDefault();
+}, false);
 
 var restartButton = document.getElementById('restart');
 restartButton.addEventListener('click', startGame);
@@ -40,10 +53,14 @@ startGame();
 
 function startGame() {
 
+
     lost = false;
     lostMessage.innerText = '';
+    wonMessage.innerText = '';
     context.clearRect(0, 0, canvasSize, canvasSize);
     context.globalAlpha = 1;
+    piggies = 10;
+    mudLeft = 10;
 
     generateField();
     generateMud();
@@ -53,6 +70,7 @@ function startGame() {
     context.fillRect(0, 0, canvasSize, canvasSize);
 
     drawGrid();
+    displayNumberLeft();
 }
 
 
@@ -88,13 +106,20 @@ function generateField() {
     }
 
     for (var i = 0; i < tableSize; i++) {
+        savedGamefield[i] = [];
+
+        for (var j = 0; j < tableSize; j++) {
+            savedGamefield[i][j] = 0;
+        }
+    }
+
+    for (var i = 0; i < tableSize; i++) {
         visited[i] = [];
 
         for (var j = 0; j < tableSize; j++) {
             visited[i][j] = false;
         }
     }
-
 }
 
 function generateMud() {
@@ -168,6 +193,12 @@ function calculateValues() {
 
         }
     }
+
+    for (var i = 0; i < tableSize; i++) {
+        for (var j = 0; j < tableSize; j++) {
+            savedGamefield[i][j] = gamefield[i][j];
+        }
+    }
 }
 
 function clickedSection(e) {
@@ -185,7 +216,7 @@ function clickedSection(e) {
 
 }
 
-/*
+
 function rightClickedSection(e) {
 
     var coordX = e.clientX - canvas.offsetLeft;
@@ -194,14 +225,56 @@ function rightClickedSection(e) {
     var iSelected = Math.floor(coordY / sectionSize);
     var jSelected = Math.floor(coordX / sectionSize);
 
-    if (visited[iSelected][jSelected] == 99 && lost == false) {
 
-        context.fillStyle = '#775511';
-        context.fillRect(j * sectionSize, i * sectionSize, sectionSize, sectionSize);
+    if (gamefield[iSelected][jSelected] == 99 && lost == false && piggies > 0) {
+
+        context.drawImage(piggyImage, jSelected * sectionSize, iSelected * sectionSize);
+
+        visited[iSelected][jSelected] = true;
+        gamefield[iSelected][jSelected] = 88; // 88 means mine marked correctly
+        piggies--;
+        mudLeft--;
+
     }
+
+    else if (lost == false && gamefield[iSelected][jSelected] < 10 && visited[iSelected][jSelected] == false && piggies > 0) {
+
+        context.drawImage(piggyImage, jSelected * sectionSize, iSelected * sectionSize);
+        gamefield[iSelected][jSelected] = 77; // 77 means false alarm
+        piggies--;
+        visited[iSelected][jSelected] = true;
+    }
+
+    else if (gamefield[iSelected][jSelected] == 77 && lost == false) {
+
+        context.clearRect(jSelected * sectionSize, iSelected * sectionSize, sectionSize, sectionSize);
+        context.fillStyle = '#66DD66';
+        context.fillRect(jSelected * sectionSize, iSelected * sectionSize, sectionSize, sectionSize);
+        gamefield[iSelected][jSelected] = savedGamefield[iSelected][jSelected];
+        piggies++;
+        visited[iSelected][jSelected] = false;
+    }
+
+    else if (gamefield[iSelected][jSelected] == 88 && lost == false) {
+
+        context.clearRect(jSelected * sectionSize, iSelected * sectionSize, sectionSize, sectionSize);
+        context.fillStyle = '#66DD66';
+        context.fillRect(jSelected * sectionSize, iSelected * sectionSize, sectionSize, sectionSize);
+        gamefield[iSelected][jSelected] = 99;
+        visited[iSelected][jSelected] = false;
+        piggies++;
+        mudLeft++;
+    }
+
+    if (piggies == 0 && mudLeft == 0) {
+        wonDisplay();
+    }
+
+    console.log(gamefield[iSelected][jSelected]);
+    displayNumberLeft();
 }
 
-*/
+
 
 function drawSection(i, j) {
 
@@ -214,14 +287,14 @@ function drawSection(i, j) {
         lostDisplay();
     }
 
-    else if (gamefield[i][j] > 0) {
+    else if (gamefield[i][j] > 0 && gamefield[i][j] < 10) {
         context.font = '25px Comic Sans MS';
         context.fillStyle = '#AAFFAA';
         context.fillRect(j * sectionSize, i * sectionSize, sectionSize, sectionSize);
         context.fillStyle = '#EE4444';
         context.fillText(gamefield[i][j], j * sectionSize + sectionSize / 3, i * sectionSize + sectionSize / 1.4);
     }
-    else {
+    else if (gamefield[i][j] == 0) {
         context.fillStyle = '#AAFFAA';
         context.fillRect(j * sectionSize, i * sectionSize, sectionSize, sectionSize);
     }
@@ -243,14 +316,34 @@ function drawSection(i, j) {
         return;
     }
 
-    console.log(i + " " + j);
+    if (piggies == 0 && mudLeft == 0) {
+        wonDisplay();
+    }
+
+    console.log(i + ' ' + j);
 }
 
 
 function lostDisplay() {
 
-    var lostMessage = document.getElementById('lost-message');
-    lostMessage.innerText = "You fell in the mud puddle. Try again!";
+    lostMessage.innerText = 'You fell in the mud puddle. Try again!';
+}
+
+function wonDisplay() {
+
+    for (var i = 0; i < tableSize; i++) {    // reveals the whole field
+        for (var j = 0; j < tableSize; j++) {
+            if (visited[i][j] == false) {
+                drawSection(i, j);
+            }
+        }
+    }
+    wonMessage.innerText = 'All the piggies are in their mud puddles! Congratulations!';
+}
+
+function displayNumberLeft() {
+
+    pigScore.innerText = 'Piggies: ' + piggies;
 }
 
 console.log(gamefield);

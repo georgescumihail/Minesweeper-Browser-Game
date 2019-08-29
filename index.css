@@ -62,3 +62,45 @@ body {
     margin: 0 auto;
     margin-top: 10px;
 }
+
+#won-message {
+
+    font-family: "Comic Sans MS";
+    font-size: 20px;
+    color: #FFAABB;
+    font-style: italic;
+    margin: 0 auto;
+    margin-top: 10px;
+}
+
+#score-time {
+
+    width: 400px;
+    height: 30px;
+    margin: 0 auto;
+    margin-top: 5px;
+    position: relative;
+
+}
+
+#score {
+
+    position: absolute;
+    left: 10px;
+    font-family: "Comic Sans MS";
+    font-weight: bold;
+    font-size: 20px;
+    color: #FFAABB;
+
+}
+
+#time {
+
+    position: absolute;
+    right: 10px;
+    font-family: "Comic Sans MS";
+    font-weight: bold;
+    font-size: 20px;
+    color: #FFAABB;
+
+}
