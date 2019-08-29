@@ -1,29 +1,28 @@
 var gamefield = []
 var savedGamefield = []
 var visited = []
-var mudHoles = []
+var mudPuddles = []
 var piggies = 10;
 var mudLeft = 10;
-
 var tableSize = 10;
 var lost = false;
+var won = false;
 
-var canvas = document.getElementById('game');
-var context = canvas.getContext('2d');
+var startTime = Date.now();
 
-var piggyImage = new Image();
-piggyImage.src = 'img/piggy-mine.png';
-piggyImage.width = 40;
-piggyImage.height = 40;
-piggyImage.globalAlpha = 0.5;
+var imageP = new Image();
+imageP.src = 'img/piggy-mine.png';
+imageP.width = 40;
+imageP.height = 40;
+imageP.globalAlpha = 0.6;
 
 var lostMessage = document.getElementById('lost-message');
 var wonMessage = document.getElementById('won-message');
-var pigScore = document.getElementById('score');
-
-
+var score = document.getElementById('score');
+var time = document.getElementById('time');
+var canvas = document.getElementById('game');
+var context = canvas.getContext('2d');
 var canvasSize = 400;
-
 canvas.width = canvasSize;
 canvas.height = canvasSize;
 
@@ -31,11 +30,11 @@ var sectionSize = canvasSize / tableSize;
 
 canvas.addEventListener('mousedown', function (e) {
 
-    if (e.button == 0) {
+    if (e.button == 0 && won == false && lost == false) {
         clickedSection(e);
     }
 
-    if (e.button == 2 && piggies >= 0) {
+    if (e.button == 2 && piggies >= 0 && won == false && lost == false) {
         rightClickedSection(e);
     }
 });
@@ -47,21 +46,12 @@ document.addEventListener('contextmenu', function (e) {
 var restartButton = document.getElementById('restart');
 restartButton.addEventListener('click', startGame);
 
-
-
 startGame();
 
 function startGame() {
 
 
-    lost = false;
-    lostMessage.innerText = '';
-    wonMessage.innerText = '';
-    context.clearRect(0, 0, canvasSize, canvasSize);
-    context.globalAlpha = 1;
-    piggies = 10;
-    mudLeft = 10;
-
+    cleanAll();
     generateField();
     generateMud();
     calculateValues();
@@ -124,7 +114,7 @@ function generateField() {
 
 function generateMud() {
 
-    mudHoles = []
+    mudPuddles = []
     var tries = tableSize;
 
     for (var i = 0; i < tries; i++) {
@@ -132,12 +122,12 @@ function generateMud() {
         var randX = Math.floor(Math.random() * tableSize);
         var randY = Math.floor(Math.random() * tableSize);
 
-        if (mudHoles.some(m => m.x === randX) && mudHoles.some(m => m.y === randY)) {
+        if (mudPuddles.some(m => m.x === randX) && mudPuddles.some(m => m.y === randY)) {
             tries++;
         }
         else {
             gamefield[randX][randY] = 99;
-            mudHoles.push({ x: randX, y: randY });
+            mudPuddles.push({ x: randX, y: randY });
         }
 
     }
@@ -209,13 +199,12 @@ function clickedSection(e) {
     var iSelected = Math.floor(coordY / sectionSize);
     var jSelected = Math.floor(coordX / sectionSize);
 
-    if (visited[iSelected][jSelected] == false && lost == false) {
+    if (visited[iSelected][jSelected] == false) {
 
         drawSection(iSelected, jSelected);
     }
 
 }
-
 
 function rightClickedSection(e) {
 
@@ -226,9 +215,9 @@ function rightClickedSection(e) {
     var jSelected = Math.floor(coordX / sectionSize);
 
 
-    if (gamefield[iSelected][jSelected] == 99 && lost == false && piggies > 0) {
+    if (gamefield[iSelected][jSelected] == 99 && piggies > 0) {
 
-        context.drawImage(piggyImage, jSelected * sectionSize, iSelected * sectionSize);
+        context.drawImage(imageP, jSelected * sectionSize, iSelected * sectionSize);
 
         visited[iSelected][jSelected] = true;
         gamefield[iSelected][jSelected] = 88; // 88 means mine marked correctly
@@ -237,28 +226,32 @@ function rightClickedSection(e) {
 
     }
 
-    else if (lost == false && gamefield[iSelected][jSelected] < 10 && visited[iSelected][jSelected] == false && piggies > 0) {
+    else if (gamefield[iSelected][jSelected] < 10 && visited[iSelected][jSelected] == false && piggies > 0) {
 
-        context.drawImage(piggyImage, jSelected * sectionSize, iSelected * sectionSize);
+        context.drawImage(imageP, jSelected * sectionSize, iSelected * sectionSize);
         gamefield[iSelected][jSelected] = 77; // 77 means false alarm
         piggies--;
         visited[iSelected][jSelected] = true;
     }
 
-    else if (gamefield[iSelected][jSelected] == 77 && lost == false) {
+    else if (gamefield[iSelected][jSelected] == 77) {
 
         context.clearRect(jSelected * sectionSize, iSelected * sectionSize, sectionSize, sectionSize);
-        context.fillStyle = '#66DD66';
+        context.fillStyle = '#51D151';
         context.fillRect(jSelected * sectionSize, iSelected * sectionSize, sectionSize, sectionSize);
+        context.beginPath();
+        context.strokeStyle = '#000000';
+        context.rect(jSelected * sectionSize, iSelected * sectionSize, sectionSize, sectionSize);
+        context.stroke();
         gamefield[iSelected][jSelected] = savedGamefield[iSelected][jSelected];
         piggies++;
         visited[iSelected][jSelected] = false;
     }
 
-    else if (gamefield[iSelected][jSelected] == 88 && lost == false) {
+    else if (gamefield[iSelected][jSelected] == 88) {
 
         context.clearRect(jSelected * sectionSize, iSelected * sectionSize, sectionSize, sectionSize);
-        context.fillStyle = '#66DD66';
+        context.fillStyle = '#51D151';
         context.fillRect(jSelected * sectionSize, iSelected * sectionSize, sectionSize, sectionSize);
         gamefield[iSelected][jSelected] = 99;
         visited[iSelected][jSelected] = false;
@@ -273,8 +266,6 @@ function rightClickedSection(e) {
     console.log(gamefield[iSelected][jSelected]);
     displayNumberLeft();
 }
-
-
 
 function drawSection(i, j) {
 
@@ -323,6 +314,18 @@ function drawSection(i, j) {
     console.log(i + ' ' + j);
 }
 
+function cleanAll() {
+
+    startTime = Date.now();
+    won = false;
+    lost = false;
+    lostMessage.innerText = '';
+    wonMessage.innerText = '';
+    context.clearRect(0, 0, canvasSize, canvasSize);
+    context.globalAlpha = 1;
+    piggies = 10;
+    mudLeft = 10;
+}
 
 function lostDisplay() {
 
@@ -331,6 +334,10 @@ function lostDisplay() {
 
 function wonDisplay() {
 
+    won = true;
+
+    wonMessage.innerText = 'All the piggies are in their mud puddles! Congratulations! Your time is ' + time.textContent;
+
     for (var i = 0; i < tableSize; i++) {    // reveals the whole field
         for (var j = 0; j < tableSize; j++) {
             if (visited[i][j] == false) {
@@ -338,12 +345,32 @@ function wonDisplay() {
             }
         }
     }
-    wonMessage.innerText = 'All the piggies are in their mud puddles! Congratulations!';
 }
 
 function displayNumberLeft() {
 
-    pigScore.innerText = 'Piggies: ' + piggies;
+    score.innerText = 'Piggies: ' + piggies;
 }
+
+function updateTime() {
+
+    var timeDifference = Date.now() - startTime;
+    var totalSeconds = Math.floor(timeDifference / 1000);
+    var minutes = Math.floor(totalSeconds / 60);
+    var seconds = totalSeconds - minutes * 60;
+
+    if (won == false && lost == false) {
+        if (seconds < 10) {
+            var formattedSeconds = '0' + seconds;
+            time.innerText = minutes + ':' + formattedSeconds;
+        }
+        else {
+            time.innerText = minutes + ':' + seconds;
+        }
+    }
+
+}
+
+window.setInterval(updateTime, 100);
 
 console.log(gamefield);
